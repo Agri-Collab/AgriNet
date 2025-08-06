@@ -1,10 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import QuestionComponent from '../Component/QuestionComponent';
 import HeaderComponent from '../Component/HeaderComponent';
+import QuestionComponent from '../Component/QuestionComponent';
+import QuestionListComponent from '../Component/QuestionListComponent';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
+  const [refreshFlag, setRefreshFlag] = useState(false);
+
+  const handleQuestionPosted = () => {
+    setRefreshFlag(prev => !prev);
+  };
 
   return (
     <div style={styles.container}>
@@ -16,21 +23,36 @@ const HomePage: React.FC = () => {
             Articles
           </button>
 
-          <button style={styles.navButton} onClick={() => navigate('/questions/new')}>
+          <button style={styles.navButton} onClick={() => setShowModal(true)}>
             Ask Question
           </button>
 
           <button style={styles.navButton} onClick={() => navigate('/chatbot')}>
             Chatbot
           </button>
+
+          <button style={styles.navButton} onClick={() => {}}>
+            Subscribe to Premium
+          </button>
         </div>
 
         <div style={styles.centerColumn}>
-          <QuestionComponent showForm={false} />
+          <QuestionListComponent refreshFlag={refreshFlag} onQuestionPosted={handleQuestionPosted} />
         </div>
 
         <div style={styles.rightColumn}></div>
       </div>
+
+      {showModal && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modalContent}>
+            <QuestionComponent
+              onClose={() => setShowModal(false)}
+              onQuestionPosted={handleQuestionPosted}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -72,15 +94,37 @@ const styles: { [key: string]: React.CSSProperties } = {
     overflowY: 'auto',
   },
   navButton: {
-    padding: '12px 20px',
-    fontSize: '1rem',
-    borderRadius: 6,
-    border: 'none',
-    cursor: 'pointer',
-    backgroundColor: '#007bff',
-    color: '#fff',
-    width: '100%',
-    textAlign: 'center',
+  padding: '14px 24px',
+  fontSize: 17,
+  fontWeight: 600,
+  backgroundColor: 'transparent',
+  color: '#007bff',
+  border: 'none',
+  borderRadius: 10,
+  cursor: 'pointer',
+  width: '100%',
+  textAlign: 'center',
+  },
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100vw',
+    height: '100vh',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 30,
+    borderRadius: 10,
+    width: '60%',
+    maxHeight: '80vh',
+    overflowY: 'auto',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
   },
 };
 
