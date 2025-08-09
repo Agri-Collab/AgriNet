@@ -11,6 +11,12 @@ interface User {
 }
 
 const UserForm: React.FC = () => {
+  const [isRegistered, setIsRegistered] = useState<boolean | null>(null); // null = ask question
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  // Registration state
   const [user, setUser] = useState<User>({
     firstName: '',
     lastName: '',
@@ -20,11 +26,13 @@ const UserForm: React.FC = () => {
     role: '',
   });
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
+  // Login state
+  const [loginData, setLoginData] = useState({
+    email: '',
+    password: '',
+  });
 
-  const handleChange = (
+  const handleUserChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
@@ -34,7 +42,15 @@ const UserForm: React.FC = () => {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setLoginData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
@@ -49,26 +65,112 @@ const UserForm: React.FC = () => {
       if (!response.ok) {
         const errorJson = await response.json();
         const messages = Object.values(errorJson.errors || {}).flat().join(', ');
-        throw new Error(messages || 'Submission failed');
+        throw new Error(messages || 'Registration failed');
       }
 
-      navigate('/home');
+      // Auto-login after registration
+      await loginUser(user.email, user.password);
     } catch (err: any) {
-      setError(err.message || 'Submission failed');
-    } finally {
+      setError(err.message || 'Registration failed');
       setLoading(false);
     }
   };
 
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      await loginUser(loginData.email, loginData.password);
+    } catch (err: any) {
+      setError(err.message || 'Login failed');
+      setLoading(false);
+    }
+  };
+
+  const loginUser = async (email: string, password: string) => {
+    const loginResponse = await fetch('https://localhost:5001/api/users/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!loginResponse.ok) {
+      throw new Error('Invalid email or password');
+    }
+
+    const loginData = await loginResponse.json();
+    localStorage.setItem('token', loginData.token);
+    navigate('/home');
+  };
+
+  if (isRegistered === null) {
+    return (
+      <div style={styles.container}>
+        <h2 style={styles.header}>Welcome</h2>
+        <p style={{ textAlign: 'center', fontSize: 18 }}>Are you already registered?</p>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginTop: 30 }}>
+          <button style={styles.button} onClick={() => setIsRegistered(true)}>
+            Yes, Login
+          </button>
+          <button style={styles.button} onClick={() => setIsRegistered(false)}>
+            No, Register
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (isRegistered) {
+    // Login form
+    return (
+      <div style={styles.container}>
+        <h2 style={styles.header}>Login</h2>
+        <form onSubmit={handleLoginSubmit} style={styles.form}>
+          <input
+            style={styles.input}
+            type="email"
+            name="email"
+            value={loginData.email}
+            onChange={handleLoginChange}
+            placeholder="Email"
+            required
+          />
+          <input
+            style={styles.input}
+            type="password"
+            name="password"
+            value={loginData.password}
+            onChange={handleLoginChange}
+            placeholder="Password"
+            required
+          />
+          <button type="submit" disabled={loading} style={styles.button}>
+            {loading ? 'Logging in...' : 'Login'}
+          </button>
+          {error && <p style={styles.error}>{error}</p>}
+          <p style={{ marginTop: 15 }}>
+            Don't have an account?{' '}
+            <span style={styles.link} onClick={() => setIsRegistered(false)}>
+              Register here
+            </span>
+          </p>
+        </form>
+      </div>
+    );
+  }
+
+  // Registration form
   return (
     <div style={styles.container}>
-      <h2 style={styles.header}>Create New User</h2>
-      <form onSubmit={handleSubmit} style={styles.form}>
+      <h2 style={styles.header}>Register</h2>
+      <form onSubmit={handleRegisterSubmit} style={styles.form}>
         <input
           style={styles.input}
           name="firstName"
           value={user.firstName}
-          onChange={handleChange}
+          onChange={handleUserChange}
           placeholder="First Name"
           required
         />
@@ -76,7 +178,7 @@ const UserForm: React.FC = () => {
           style={styles.input}
           name="lastName"
           value={user.lastName}
-          onChange={handleChange}
+          onChange={handleUserChange}
           placeholder="Last Name"
           required
         />
@@ -85,7 +187,7 @@ const UserForm: React.FC = () => {
           type="email"
           name="email"
           value={user.email}
-          onChange={handleChange}
+          onChange={handleUserChange}
           placeholder="Email"
           required
         />
@@ -94,7 +196,7 @@ const UserForm: React.FC = () => {
           type="password"
           name="password"
           value={user.password}
-          onChange={handleChange}
+          onChange={handleUserChange}
           placeholder="Password"
           required
         />
@@ -102,7 +204,7 @@ const UserForm: React.FC = () => {
           style={styles.input}
           name="phoneNumber"
           value={user.phoneNumber}
-          onChange={handleChange}
+          onChange={handleUserChange}
           placeholder="Phone Number"
           required
         />
@@ -110,7 +212,7 @@ const UserForm: React.FC = () => {
           style={styles.select}
           name="role"
           value={user.role}
-          onChange={handleChange}
+          onChange={handleUserChange}
           required
         >
           <option value="">Select Role</option>
@@ -118,12 +220,16 @@ const UserForm: React.FC = () => {
           <option value="AGRIMECHANIC">AGRIMECHANIC</option>
           <option value="ADMIN">ADMIN</option>
         </select>
-
         <button type="submit" disabled={loading} style={styles.button}>
-          {loading ? 'Submitting...' : 'Submit'}
+          {loading ? 'Registering...' : 'Register'}
         </button>
-
         {error && <p style={styles.error}>{error}</p>}
+        <p style={{ marginTop: 15 }}>
+          Already registered?{' '}
+          <span style={styles.link} onClick={() => setIsRegistered(true)}>
+            Login here
+          </span>
+        </p>
       </form>
     </div>
   );
@@ -173,6 +279,11 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: 'red',
     marginTop: 10,
     textAlign: 'center',
+  },
+  link: {
+    color: '#007bff',
+    cursor: 'pointer',
+    textDecoration: 'underline',
   },
 };
 

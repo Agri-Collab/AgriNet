@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import HeaderComponent from '../Component/HeaderComponent';
 import QuestionComponent from '../Component/QuestionComponent';
 import QuestionListComponent from '../Component/QuestionListComponent';
+import ChatComponent from '../Component/ChatComponent';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -40,7 +41,9 @@ const HomePage: React.FC = () => {
           <QuestionListComponent refreshFlag={refreshFlag} onQuestionPosted={handleQuestionPosted} />
         </div>
 
-        <div style={styles.rightColumn}></div>
+        <div style={styles.rightColumn}>
+          {/*<ChatComponent />*/}
+        </div>
       </div>
 
       {showModal && (
