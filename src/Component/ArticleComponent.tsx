@@ -7,7 +7,7 @@ interface ArticleComponentProps {
 
 const ArticleComponent: React.FC<ArticleComponentProps> = ({ onClose, onArticlePosted }) => {
   const [title, setTitle] = useState('');
-  const [body, setBody] = useState(''); // state variable for article content
+  const [body, setBody] = useState(''); 
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -16,8 +16,8 @@ const ArticleComponent: React.FC<ArticleComponentProps> = ({ onClose, onArticleP
 
     const newArticle = {
       title: title,
-      content: body, // backend expects `content`
-      userId: 1, // replace with dynamic userId if needed
+      content: body, 
+      userId: 1, 
     };
 
     try {
@@ -29,8 +29,8 @@ const ArticleComponent: React.FC<ArticleComponentProps> = ({ onClose, onArticleP
 
       if (res.ok) {
         alert('Article posted successfully!');
-        onArticlePosted(); // refresh parent list
-        onClose(); // close modal
+        onArticlePosted();
+        onClose(); 
         setTitle('');
         setBody('');
       } else {

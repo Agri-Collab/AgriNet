@@ -18,13 +18,13 @@ const HeaderComponent: React.FC<HeaderProps> = ({ onSearch, placeholder }) => {
 
   return (
     <header style={styles.header}>
-      {/* Left Section with Logo + Text */}
+  
       <div style={styles.left}>
         <img src="/Logo.jpeg" alt="Logo" style={styles.logoImg} />
         <h1 style={styles.logoText}>AgriNet</h1>
       </div>
 
-      {/* Center Search */}
+
       <div style={styles.center}>
         <input
           type="text"
@@ -34,7 +34,7 @@ const HeaderComponent: React.FC<HeaderProps> = ({ onSearch, placeholder }) => {
         />
       </div>
 
-      {/* Right Section */}
+
       <div style={styles.right}>
         <button style={styles.logoutButton} onClick={handleLogout}>
           Logout

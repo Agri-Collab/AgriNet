@@ -17,7 +17,7 @@ interface QuestionListProps {
 
 const QuestionListComponent: React.FC<QuestionListProps> = ({ refreshFlag, searchQuery }) => {
   const [questions, setQuestions] = useState<Question[]>([]);
-  const API_URL = 'https://localhost:5001/api/questions'; // replace with your real API
+  const API_URL = 'https://localhost:5001/api/questions'; 
 
   useEffect(() => {
     fetch(API_URL)

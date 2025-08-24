@@ -1,19 +1,13 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaNewspaper, FaQuestionCircle, FaRobot, FaStar, FaQuestion } from 'react-icons/fa';
-import HeaderComponent from '../Component/HeaderComponent';
-import QuestionComponent from '../Component/QuestionComponent';
-import QuestionListComponent from '../Component/QuestionListComponent';
-import AdvertisementComponent from '../Component/AdvertisementComponent';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { FaNewspaper, FaQuestionCircle, FaRobot, FaStar, FaQuestion } from "react-icons/fa";
+import HeaderComponent from "../Component/HeaderComponent";
+import QuestionComponent from "../Component/QuestionComponent";
+import QuestionListComponent from "../Component/QuestionListComponent";
+import AdvertisementComponent from "../Component/AdvertisementComponent";
 
-interface SidebarButtonProps {
-  icon: React.ReactNode;
-  text: string;
-  onClick: () => void;
-}
-
-const SidebarButton: React.FC<SidebarButtonProps> = ({ icon, text, onClick }) => {
-  const [hover, setHover] = useState(false);
+const SidebarButton: React.FC<{ icon: React.ReactNode; text: string; onClick: () => void }> = ({ icon, text, onClick }) => {
+  const [hover, setHover] = React.useState(false);
   return (
     <button
       onClick={onClick}
@@ -53,7 +47,6 @@ const HomePage: React.FC = () => {
 
   return (
     <div style={styles.container}>
-      {/* Header */}
       <HeaderComponent onSearch={setSearchQuery} />
 
       <div style={styles.page}>
@@ -74,73 +67,23 @@ const HomePage: React.FC = () => {
 
         {/* Right Column */}
         <div style={styles.rightColumn}>
-          {!showAdModal && <AdvertisementComponent mini />} {/* static mini ad */}
+          {!showAdModal && <AdvertisementComponent mini />}
         </div>
       </div>
 
-      {/* Question Modal */}
-      {showQuestionModal && (
-        <QuestionComponent
-          onClose={() => setShowQuestionModal(false)}
-          onQuestionPosted={handleQuestionPosted}
-        />
-      )}
-
-      {/* Advertisement Modal */}
-      {showAdModal && (
-        <AdvertisementComponent onClose={() => setShowAdModal(false)} />
-      )}
+      {/* Modals */}
+      {showQuestionModal && <QuestionComponent onClose={() => setShowQuestionModal(false)} onQuestionPosted={handleQuestionPosted} />}
+      {showAdModal && <AdvertisementComponent onClose={() => setShowAdModal(false)} />}
     </div>
   );
 };
 
 export default HomePage;
 
-// Styles
 const styles: { [key: string]: React.CSSProperties } = {
-  container: {
-    fontFamily: 'Segoe UI, sans-serif',
-    backgroundColor: '#f8f9f9',
-    height: '100vh',
-    width: '100vw',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  page: {
-    display: 'flex',
-    flex: 1,
-    overflow: 'hidden',
-  },
-  sidebar: {
-    width: 200,
-    padding: 16,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 8,
-    borderRight: '1px solid #ddd',
-    backgroundColor: '#fff',
-    position: 'sticky',
-    top: 0,
-    height: '100vh',
-  },
-  centerColumn: {
-    flex: 1,
-    padding: 24,
-    margin: 16,
-    overflowY: 'auto',
-    backgroundColor: '#fff',
-    borderRadius: 6,
-    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-  },
-  rightColumn: {
-    width: 250,
-    padding: 16,
-    margin: 16,
-    borderRadius: 6,
-    backgroundColor: '#fff',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-    position: 'sticky',
-    top: 0,
-    height: '100vh',
-  },
+  container: { fontFamily: 'Segoe UI, sans-serif', backgroundColor: '#f8f9f9', height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column' },
+  page: { display: 'flex', flex: 1, overflow: 'hidden' },
+  sidebar: { display: 'flex', flexDirection: 'column', gap: 8, width: 200, padding: 16, borderRight: '1px solid #ddd', backgroundColor: '#fff', height: '100vh' },
+  centerColumn: { flex: 1, padding: 24, margin: 16, overflowY: 'auto', backgroundColor: '#fff', borderRadius: 6, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' },
+  rightColumn: { width: 250, padding: 16, margin: 16, borderRadius: 6, backgroundColor: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', position: 'sticky', top: 0, height: '100vh' },
 };

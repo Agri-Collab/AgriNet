@@ -8,6 +8,7 @@ import ChatbotPage from './pages/ChatbotPage';
 import AdvertisementPage from './pages/AdvertisementPage';
 import FAQPage from './pages/FAQPage';
 
+
 const App: React.FC = () => {
   return (
     <Routes>
@@ -19,6 +20,8 @@ const App: React.FC = () => {
       <Route path="/advertise" element={<AdvertisementPage />} />
 
     <Route path="/faq" element={<FAQPage />}/>
+
+   
     </Routes>
   );
 };
