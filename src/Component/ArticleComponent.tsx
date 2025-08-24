@@ -1,126 +1,146 @@
 import React, { useState } from 'react';
 
-interface Article {
-  id: number;
-  title: string;
-  content: string;
-  userId: number;
-}
-
 interface ArticleComponentProps {
-  onArticlePosted: () => void; 
+  onClose: () => void;
+  onArticlePosted: () => void;
 }
 
-const ArticleComponent: React.FC<ArticleComponentProps> = ({ onArticlePosted }) => {
+const ArticleComponent: React.FC<ArticleComponentProps> = ({ onClose, onArticlePosted }) => {
   const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [userId, setUserId] = useState<number | ''>('');
-  const [error, setError] = useState<string | null>(null);
+  const [body, setBody] = useState(''); // state variable for article content
   const [loading, setLoading] = useState(false);
 
-  const handlePost = async () => {
-    if (!title.trim() || !content.trim() || userId === '') {
-      setError('Please fill all fields.');
-      return;
-    }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
-    setError(null);
+
+    const newArticle = {
+      title: title,
+      content: body, // backend expects `content`
+      userId: 1, // replace with dynamic userId if needed
+    };
+
     try {
-      const response = await fetch('https://localhost:5001/api/articles', {
+      const res = await fetch('https://localhost:5001/api/articles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, content, userId }),
+        body: JSON.stringify(newArticle),
       });
 
-      if (!response.ok) {
-        const text = await response.text();
-        setError(`Failed to post article: ${text}`);
-        setLoading(false);
-        return;
+      if (res.ok) {
+        alert('Article posted successfully!');
+        onArticlePosted(); // refresh parent list
+        onClose(); // close modal
+        setTitle('');
+        setBody('');
+      } else {
+        const errorText = await res.text();
+        alert('Failed to post article: ' + errorText);
       }
-      
-      setTitle('');
-      setContent('');
-      setUserId('');
-      setError(null);
-      setLoading(false);
-
-
-      onArticlePosted();
-    } catch {
-      setError('Failed to post article.');
+    } catch (err) {
+      console.error(err);
+      alert('Error posting article');
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={styles.container}>
-      <h2>📚 Post a New Article</h2>
-
-      <input
-        type="text"
-        placeholder="Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        style={styles.input}
-        maxLength={250}
-      />
-      <br />
-
-      <textarea
-        placeholder="Content"
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        rows={4}
-        style={styles.textarea}
-      />
-      <br />
-
-      <input
-        type="number"
-        placeholder="User ID"
-        value={userId}
-        onChange={(e) => setUserId(Number(e.target.value) || '')}
-        style={styles.input}
-      />
-      <br />
-
-      <button onClick={handlePost} style={styles.button} disabled={loading}>
-        {loading ? 'Posting...' : 'Post Article'}
-      </button>
-
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+    <div style={styles.modalOverlay}>
+      <div style={styles.modalContainer}>
+        <h2 style={{ marginBottom: 12 }}>📝 Post New Article</h2>
+        <form onSubmit={handleSubmit} style={styles.form}>
+          <input
+            type="text"
+            placeholder="Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+            style={styles.input}
+            autoFocus
+          />
+          <textarea
+            placeholder="Content"
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            required
+            style={styles.textarea}
+          />
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+            <button type="button" onClick={onClose} style={styles.cancelButton}>
+              Cancel
+            </button>
+            <button type="submit" style={styles.submitButton} disabled={loading}>
+              {loading ? 'Posting...' : 'Post Article'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
 
 const styles: { [key: string]: React.CSSProperties } = {
-  container: {
-    padding: 16,
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100vw',
+    height: '100vh',
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 2000,
+  },
+  modalContainer: {
+    width: '500px',
+    maxHeight: '90vh',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 16,
+    overflowY: 'auto',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+    position: 'relative',
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 12,
   },
   input: {
-    width: '100%',
-    padding: 8,
-    fontSize: '1rem',
-    borderRadius: 4,
+    padding: 10,
+    fontSize: 16,
+    borderRadius: 6,
     border: '1px solid #ccc',
-    marginBottom: 8,
+    outline: 'none',
   },
   textarea: {
-    width: '100%',
     padding: 10,
-    fontSize: '1rem',
-    borderRadius: 4,
+    fontSize: 16,
+    borderRadius: 6,
     border: '1px solid #ccc',
-    marginBottom: 8,
+    resize: 'none',
+    minHeight: 120,
+    outline: 'none',
   },
-  button: {
-    padding: '8px 16px',
-    fontSize: '1rem',
-    backgroundColor: '#4caf50',
-    color: 'white',
+  cancelButton: {
+    padding: '10px 20px',
+    backgroundColor: '#ccc',
+    color: '#333',
     border: 'none',
-    borderRadius: 4,
+    borderRadius: 6,
+    cursor: 'pointer',
+  },
+  submitButton: {
+    padding: '10px 20px',
+    backgroundColor: '#007bff',
+    color: '#fff',
+    border: 'none',
+    borderRadius: 6,
     cursor: 'pointer',
   },
 };

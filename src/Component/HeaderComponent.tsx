@@ -1,23 +1,44 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const HeaderComponent: React.FC = () => {
+interface HeaderProps {
+  onSearch?: (query: string) => void;
+  placeholder?: string;
+}
+
+const HeaderComponent: React.FC<HeaderProps> = ({ onSearch, placeholder }) => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to logout?")) {
+      localStorage.removeItem('token');
+      navigate('/');
+    }
+  };
+
   return (
     <header style={styles.header}>
+      {/* Left Section with Logo + Text */}
       <div style={styles.left}>
-        <h2>AgriNet</h2>
-        <a href="#about" style={styles.link}>About</a>
+        <img src="/Logo.jpeg" alt="Logo" style={styles.logoImg} />
+        <h1 style={styles.logoText}>AgriNet</h1>
       </div>
 
+      {/* Center Search */}
       <div style={styles.center}>
         <input
           type="text"
-          placeholder="Search articles..."
+          placeholder={placeholder || "Search..."}
           style={styles.search}
+          onChange={e => onSearch?.(e.target.value)}
         />
       </div>
 
+      {/* Right Section */}
       <div style={styles.right}>
-        <button style={styles.menuButton}>☰ Menu</button>
+        <button style={styles.logoutButton} onClick={handleLogout}>
+          Logout
+        </button>
       </div>
     </header>
   );
@@ -25,48 +46,63 @@ const HeaderComponent: React.FC = () => {
 
 const styles: { [key: string]: React.CSSProperties } = {
   header: {
+    position: 'sticky',
+    top: 0,
+    zIndex: 1000,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: '10px 20px',
-    backgroundColor: '#008002ff',
-    color: '#fff',
+    backgroundColor: '#ffffff',
+    color: '#000000',
+    padding: '8px 20px',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
     height: 60,
   },
-  left: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 20,
+  left: { 
+    display: 'flex', 
+    alignItems: 'center', 
+    gap: 10 
   },
-  link: {
-    color: '#fff',
-    textDecoration: 'none',
-    fontSize: 16,
+  logoImg: { 
+    height: 40, 
+    width: 40, 
+    objectFit: 'cover', 
+    borderRadius: '50%' 
   },
-  center: {
-    flex: 1,
-    textAlign: 'center',
+  logoText: { 
+    fontSize: 24, 
+    fontWeight: 700, 
+    margin: 0, 
+    color: '#000000' 
+  },
+  center: { 
+    flex: 1, 
+    display: 'flex', 
+    justifyContent: 'center' 
   },
   search: {
-    width: '60%',
-    padding: 8,
-    fontSize: 16,
+    width: '50%',
+    padding: '6px 10px',
     borderRadius: 4,
-    border: 'none',
+    border: '1px solid #ccc',
+    fontSize: 16,
+    outline: 'none',
   },
-  right: {
-    display: 'flex',
-    alignItems: 'center',
+  right: { 
+    display: 'flex', 
+    alignItems: 'center', 
+    gap: 10 
   },
-  menuButton: {
-    fontSize: 18,
+  logoutButton: {
     padding: '6px 12px',
-    backgroundColor: '#008002ff',
-    color: '#fff',
+    backgroundColor: '#000000',
+    color: '#ffffff',
     border: 'none',
     borderRadius: 4,
     cursor: 'pointer',
+    fontWeight: 600,
+    fontSize: 14,
   },
 };
 
-export default HeaderComponent
+export default HeaderComponent;

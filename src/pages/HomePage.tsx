@@ -1,134 +1,146 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaNewspaper, FaQuestionCircle, FaRobot, FaStar, FaQuestion } from 'react-icons/fa';
 import HeaderComponent from '../Component/HeaderComponent';
 import QuestionComponent from '../Component/QuestionComponent';
 import QuestionListComponent from '../Component/QuestionListComponent';
-import ChatComponent from '../Component/ChatComponent';
+import AdvertisementComponent from '../Component/AdvertisementComponent';
+
+interface SidebarButtonProps {
+  icon: React.ReactNode;
+  text: string;
+  onClick: () => void;
+}
+
+const SidebarButton: React.FC<SidebarButtonProps> = ({ icon, text, onClick }) => {
+  const [hover, setHover] = useState(false);
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '12px 16px',
+        fontSize: 14,
+        fontWeight: 500,
+        backgroundColor: hover ? '#e3f2fd' : 'transparent',
+        color: '#222',
+        border: 'none',
+        borderRadius: 4,
+        cursor: 'pointer',
+        width: '100%',
+        textAlign: 'left',
+        transition: 'background-color 0.2s',
+      }}
+    >
+      <span style={{ fontSize: 18, color: hover ? '#1976d2' : '#555' }}>{icon}</span>
+      {text}
+    </button>
+  );
+};
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const [showModal, setShowModal] = useState(false);
+  const [showQuestionModal, setShowQuestionModal] = useState(false);
+  const [showAdModal, setShowAdModal] = useState(false);
   const [refreshFlag, setRefreshFlag] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const handleQuestionPosted = () => {
-    setRefreshFlag(prev => !prev);
-  };
+  const handleQuestionPosted = () => setRefreshFlag(prev => !prev);
 
   return (
     <div style={styles.container}>
-      <HeaderComponent />
+      {/* Header */}
+      <HeaderComponent onSearch={setSearchQuery} />
 
       <div style={styles.page}>
-        <div style={styles.leftColumn}>
-          <button style={styles.navButton} onClick={() => navigate('/articles')}>
-            Articles
-          </button>
-
-          <button style={styles.navButton} onClick={() => setShowModal(true)}>
-            Ask Question
-          </button>
-
-          <button style={styles.navButton} onClick={() => navigate('/chatbot')}>
-            Chatbot
-          </button>
-
-          <button style={styles.navButton} onClick={() => {}}>
-            Subscribe to Premium
-          </button>
+        {/* Sidebar */}
+        <div style={styles.sidebar}>
+          <SidebarButton icon={<FaNewspaper />} text="Articles" onClick={() => navigate('/articles')} />
+          <SidebarButton icon={<FaQuestionCircle />} text="Ask Question" onClick={() => setShowQuestionModal(true)} />
+          <SidebarButton icon={<FaRobot />} text="Chatbot" onClick={() => navigate('/chatbot')} />
+          <SidebarButton icon={<FaStar />} text="Subscribe Premium" onClick={() => {}} />
+          <SidebarButton icon={<FaStar />} text="Advertise" onClick={() => setShowAdModal(true)} />
+          <SidebarButton icon={<FaQuestion />} text="FAQ" onClick={() => navigate('/faq')} />
         </div>
 
+        {/* Center Column */}
         <div style={styles.centerColumn}>
-          <QuestionListComponent refreshFlag={refreshFlag} onQuestionPosted={handleQuestionPosted} />
+          <QuestionListComponent refreshFlag={refreshFlag} searchQuery={searchQuery} />
         </div>
 
+        {/* Right Column */}
         <div style={styles.rightColumn}>
-          {/*<ChatComponent />*/}
+          {!showAdModal && <AdvertisementComponent mini />} {/* static mini ad */}
         </div>
       </div>
 
-      {showModal && (
-        <div style={styles.modalOverlay}>
-          <div style={styles.modalContent}>
-            <QuestionComponent
-              onClose={() => setShowModal(false)}
-              onQuestionPosted={handleQuestionPosted}
-            />
-          </div>
-        </div>
+      {/* Question Modal */}
+      {showQuestionModal && (
+        <QuestionComponent
+          onClose={() => setShowQuestionModal(false)}
+          onQuestionPosted={handleQuestionPosted}
+        />
+      )}
+
+      {/* Advertisement Modal */}
+      {showAdModal && (
+        <AdvertisementComponent onClose={() => setShowAdModal(false)} />
       )}
     </div>
   );
 };
 
+export default HomePage;
+
+// Styles
 const styles: { [key: string]: React.CSSProperties } = {
   container: {
+    fontFamily: 'Segoe UI, sans-serif',
+    backgroundColor: '#f8f9f9',
     height: '100vh',
     width: '100vw',
     display: 'flex',
     flexDirection: 'column',
-    fontFamily: 'Arial, sans-serif',
   },
   page: {
-    flexGrow: 1,
     display: 'flex',
-    width: '100%',
-    height: '100%',
+    flex: 1,
+    overflow: 'hidden',
   },
-  leftColumn: {
-    width: '25%',
-    backgroundColor: '#f4f4f4',
-    padding: 20,
+  sidebar: {
+    width: 200,
+    padding: 16,
     display: 'flex',
     flexDirection: 'column',
-    gap: 16,
-    overflowY: 'auto',
-    alignItems: 'stretch',
+    gap: 8,
+    borderRight: '1px solid #ddd',
+    backgroundColor: '#fff',
+    position: 'sticky',
+    top: 0,
+    height: '100vh',
   },
   centerColumn: {
-    width: '50%',
-    backgroundColor: '#fff',
-    padding: 20,
+    flex: 1,
+    padding: 24,
+    margin: 16,
     overflowY: 'auto',
+    backgroundColor: '#fff',
+    borderRadius: 6,
+    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
   },
   rightColumn: {
-    width: '25%',
-    backgroundColor: '#fafafa',
-    padding: 20,
-    overflowY: 'auto',
-  },
-  navButton: {
-  padding: '14px 24px',
-  fontSize: 17,
-  fontWeight: 600,
-  backgroundColor: 'transparent',
-  color: '#007bff',
-  border: 'none',
-  borderRadius: 10,
-  cursor: 'pointer',
-  width: '100%',
-  textAlign: 'center',
-  },
-  modalOverlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100vw',
-    height: '100vh',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
-  },
-  modalContent: {
+    width: 250,
+    padding: 16,
+    margin: 16,
+    borderRadius: 6,
     backgroundColor: '#fff',
-    padding: 30,
-    borderRadius: 10,
-    width: '60%',
-    maxHeight: '80vh',
-    overflowY: 'auto',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+    position: 'sticky',
+    top: 0,
+    height: '100vh',
   },
 };
-
-export default HomePage;
