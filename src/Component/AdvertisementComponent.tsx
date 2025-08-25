@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 
 interface AdvertisementComponentProps {
-  onClose?: () => void; // optional for mini ad
-  mini?: boolean;        // true = mini static ad
+  onClose?: () => void; 
+  mini?: boolean;  
 }
 
 const AdvertisementComponent: React.FC<AdvertisementComponentProps> = ({ onClose, mini = false }) => {
